@@ -66,6 +66,7 @@
     "stacktrace-parser": "0.1.1",
     "temp": "0.8.1",
     "text-buffer": "^5.0.2",
+    "text-document": "0.0.0",
     "theorist": "^1.0.2",
     "underscore-plus": "^1.6.6"
   },
