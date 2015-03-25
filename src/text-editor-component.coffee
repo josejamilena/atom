@@ -736,6 +736,7 @@ class TextEditorComponent
 
   # Deprecated
   setShowInvisibles: (showInvisibles) ->
+    grim.deprecate "Use config.set('editor.showInvisibles', showInvisibles) instead"
     atom.config.set('editor.showInvisibles', showInvisibles)
 
   setScrollSensitivity: (scrollSensitivity) =>
