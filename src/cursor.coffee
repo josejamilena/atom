@@ -44,13 +44,13 @@ class Cursor extends Model
         textChanged: textChanged
         cursor: this
 
-      @emit 'moved', movedEvent
+      @emit 'moved', movedEvent if Grim.includeDeprecations
       @emitter.emit 'did-change-position', movedEvent
       @editor.cursorMoved(movedEvent)
     @marker.onDidDestroy =>
       @destroyed = true
       @editor.removeCursor(this)
-      @emit 'destroyed'
+      @emit 'destroyed' if Grim.includeDeprecations
       @emitter.emit 'did-destroy'
       @emitter.dispose()
     @needsAutoscroll = true
@@ -95,6 +95,8 @@ class Cursor extends Model
     @emitter.on 'did-change-visibility', callback
 
   on: (eventName) ->
+    return unless Grim.includeDeprecations
+
     switch eventName
       when 'moved'
         Grim.deprecate("Use Cursor::onDidChangePosition instead")
@@ -229,9 +231,6 @@ class Cursor extends Model
   # Returns a {ScopeDescriptor}
   getScopeDescriptor: ->
     @editor.scopeDescriptorForBufferPosition(@getBufferPosition())
-  getScopes: ->
-    Grim.deprecate 'Use Cursor::getScopeDescriptor() instead'
-    @getScopeDescriptor().getScopesArray()
 
   # Public: Returns true if this cursor has no non-whitespace characters before
   # its current position.
@@ -483,10 +482,6 @@ class Cursor extends Model
 
     endOfWordPosition or currentBufferPosition
 
-  getMoveNextWordBoundaryBufferPosition: (options) ->
-    Grim.deprecate 'Use `::getNextWordBoundaryBufferPosition(options)` instead'
-    @getNextWordBoundaryBufferPosition(options)
-
   # Public: Retrieves the buffer position of where the current word starts.
   #
   # * `options` (optional) An {Object} with the following keys:
@@ -601,7 +596,7 @@ class Cursor extends Model
     if @visible != visible
       @visible = visible
       @needsAutoscroll ?= true if @visible and @isLastCursor()
-      @emit 'visibility-changed', @visible
+      @emit 'visibility-changed', @visible if Grim.includeDeprecations
       @emitter.emit 'did-change-visibility', @visible
 
   # Public: Returns the visibility of the cursor.
@@ -659,7 +654,7 @@ class Cursor extends Model
     @needsAutoscroll = options.autoscroll ? @isLastCursor()
     fn()
     if @needsAutoscroll
-      @emit 'autoscrolled' # Support legacy editor
+      @emit 'autoscrolled' if Grim.includeDeprecations # Support legacy editor
       @autoscroll() if @needsAutoscroll and @editor.manageScrollPosition # Support react editor view
 
   getPixelRect: ->
@@ -698,3 +693,13 @@ class Cursor extends Model
         position = range.start
         stop()
     @editor.screenPositionForBufferPosition(position)
+
+
+if Grim.includeDeprecations
+  Cursor::getScopes = ->
+    Grim.deprecate 'Use Cursor::getScopeDescriptor() instead'
+    @getScopeDescriptor().getScopesArray()
+
+  Cursor::getMoveNextWordBoundaryBufferPosition = (options) ->
+    Grim.deprecate 'Use `::getNextWordBoundaryBufferPosition(options)` instead'
+    @getNextWordBoundaryBufferPosition(options)
